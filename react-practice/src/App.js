@@ -6,8 +6,9 @@ function App() {
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
+        <button onClick={() => console.log('push')}>Button</button>
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          Hello World
         </p>
         <a
           className="App-link"
