@@ -1,43 +1,17 @@
 import logo from "./logo.svg";
 import "./App.css";
-import { useState } from "react";
+import Form from "./Form.js";
 
 function App() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [age, setAge] = useState("");
-
-  const onSubmit = (submit) => {
-    submit.preventDefault();
-    console.log("onSubmit: ", name, age, email);
+  const onSubmit = (name, email) => {
+    console.log("onSubmit:", name, " ", email);
   };
 
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <form style={{ display: "flex", flexDirection: "column" }}>
-          <label>Name: </label>
-          <input
-            type={"text"}
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          ></input>
-          <lavel>Age: </lavel>
-          <input
-            type={"age"}
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            ></input>
-          <label>Email: </label>
-          <input
-            type={"email"}
-            style={{ marginBottom: 20 }}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          ></input>
-          <button onClick={onSubmit}>Submit</button>
-        </form>
+        <Form onSubmit={onSubmit}/>
         <p>
           Edit <code>src/App.js</code> and save to reload.
         </p>
