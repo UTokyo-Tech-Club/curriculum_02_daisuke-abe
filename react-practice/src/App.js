@@ -1,11 +1,43 @@
 import logo from "./logo.svg";
 import "./App.css";
 import Form from "./Form.js";
+import { useState } from "react";
+
 
 function App() {
-  const onSubmit = (name, email) => {
-    console.log("onSubmit:", name, " ", email);
+  const [age, setAge] = useState(0);
+  const onSubmit = async (name, email, age) => {
+    const response = await fetch(
+      "https://testuttc-a485d-default-rtdb.asia-southeast1.firebasedatabase.app/tweets.json",
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+      const data = await response.json();
+      const obj = Object.values(data).filter((v) => v.name === "inada")[0];
+      setAge(parseFloat(obj.age) + 10);
   };
+
+  // const onSubmit = async (name, email, age) => {
+  //   const response = await fetch(
+  //     "https://testuttc-a485d-default-rtdb.asia-southeast1.firebasedatabase.app//tweets.json",
+  //     {
+  //       method: "POST",
+  //       headers: {
+  //         "Content-Type": "application/json",
+  //       },
+  //       body: JSON.stringify({
+  //         name,
+  //         email,
+  //         age,
+  //       }),
+  //     }
+  //   );
+  //   console.log("response is...", response);
+  // };
 
   return (
     <div className="App">
@@ -13,7 +45,7 @@ function App() {
         <img src={logo} className="App-logo" alt="logo" />
         <Form onSubmit={onSubmit}/>
         <p>
-          Edit <code>src/App.js</code> and save to reload.
+          {age}
         </p>
         <a
           className="App-link"
