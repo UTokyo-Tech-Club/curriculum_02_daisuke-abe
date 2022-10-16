@@ -12,6 +12,7 @@ import (
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	"github.com/oklog/ulid/v2"
 )
 
 type UserResForHTTPGet struct {
@@ -99,15 +100,18 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 	case http.MethodPost:
 		var u UserResForHTTPPost
-		// TODO: nameが空だったり長すぎたり短すぎたりするときの処理どうやって書くかわからん
+		fmt.Println("got POST method")
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
-		} else if name := json.NewDecoder(r.Body).Name; name = "" || len(name)>80 || len(name)<20{
+		}
+
+		if u.Name == "" || len(u.Name) > 50 || u.Age < 20 || u.Age > 80 {
+			fmt.Println("Name and age don't meet the format")
 			w.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		
+
 		fmt.Printf("%+v\n", u)
 
 		ins, err := db.Prepare("INSERT INTO user VALUES(?, ?, ?)")
@@ -116,23 +120,24 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		defer ins.Close()
+		fmt.Println("SQL prepared")
 
-		// TODO: idを採番してぶちこむ
-		res, err := ins.Exec(id, u.Name, u.Age)
+		id := ulid.Make()
+		res, err := ins.Exec(id.String(), u.Name, u.Age)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
+		fmt.Println("inserted to DB")
 
 		lastInsertID, err := res.LastInsertId()
 		if err != nil {
 			log.Fatal(err)
 			w.WriteHeader(http.StatusInternalServerError)
-		} else {
-			w.WriteHeader(http.StatusOK)
 		}
+		w.WriteHeader(http.StatusOK)
 		log.Println(lastInsertID)
-
+		fmt.Println("id: " + id.String())
 	default:
 		log.Printf("fail: HTTP Method is %s\n", r.Method)
 		w.WriteHeader(http.StatusBadRequest)
