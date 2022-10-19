@@ -14,33 +14,7 @@ const Form = (props: Props) => {
   const [name, setName] = useState("");
   const [age, setAge] = useState(0);
 
-  useEffect(() => {
-    // axios.get<USER>(`${url}/users`)
-    //   .then((res) => {
-    //     const { name, age } = res;
-    //     setName(name);
-    //     setAge(age);
-    //   })
-    //   .catch((e: AxiosError<{ error: string }>) => {
-    //     // エラー処理
-    //     console.log(e.message);
-    //   });
-  //   axios.get("http://localhost:8000/users")
-      
-  //   console.log("aaa")
-  // 
   
-  axios.get('http://localhost:8000/users')
-    .then(response => {
-      console.log('status:', response.status);
-      console.log('body:', response.data)
-    })
-  
-  // Starting Request: {リクエスト内容} <- consoleに出力される
-  
-  // Response: {レスポンス内容} <- consoleに出力される
-
-}, []);
 
   const submit = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();

@@ -69,3 +69,12 @@
   flex-direction: "column";
   justify-content: center;
 }
+
+.list {
+  font-size: small;
+  background-color: rgba(39, 40, 60, 0.434);
+  color:black;
+  list-style: none;
+  padding: 15px 150px;
+  margin-top: 10px;
+}
