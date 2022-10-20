@@ -1,6 +1,6 @@
 import logo from "./logo.svg";
 import "./App.css";
-import Form from "./Form.js";
+import Form from "./Form";
 
 function App() {
   const onSubmit = (name: string, email: string) => {
