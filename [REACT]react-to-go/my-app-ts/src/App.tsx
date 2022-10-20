@@ -10,22 +10,28 @@ import { useEffect } from "react";
 //   name: string
 //   age: number
 // };
-type hoge = {
+type Hoge = {
   id: string;
   name: string;
   age: number;
-}
+};
 
 function App() {
-  const onSubmit = (name: string, age: number) => {
+  const [posts, setPosts] = useState<Hoge[]>([]);
+
+  const onSubmit = async (name: string, age: number) => {
     console.log("onSubmit:", name, " ", age);
-    axios.post("http://localhost:8000/user", {
+    await axios.post("http://localhost:8000/user", {
       name: name,
       age: age,
     });
+    fetch("http://localhost:8000/users")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("hoge", data);
+        setPosts(data);
+      });
   };
-  
-  const [posts, setPosts] = useState<hoge[]>([]);
 
   useEffect(() => {
     fetch("http://localhost:8000/users")

@@ -5,20 +5,24 @@ import user from "./user.json"; //レスポンスのJSON(詳しくは補足で)
 const url = "http://localhost:8000";
 
 type USER = typeof user; //画面に表示するユーザー情報の型
+type hoge = {
+  id: string;
+  name: string;
+  age: number;
+};
 
 type Props = {
-  onSubmit: (name: string, age: number) => void;
+  onSubmit: (name: string, age: number) => Promise<void>;
+  // setPosts: (data: React.SetStateAction<hoge[]>) => void;
 };
 
 const Form = (props: Props) => {
   const [name, setName] = useState("");
   const [age, setAge] = useState(0);
 
-  
-
-  const submit = (e: React.MouseEvent<HTMLButtonElement>) => {
+  const submit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    props.onSubmit(name, age);
+    await props.onSubmit(name, age);
   };
 
   return (
