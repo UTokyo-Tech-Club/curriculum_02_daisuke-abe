@@ -14,8 +14,7 @@ func FizzBuzz(numbers []int) []string {
 	for _, n := range numbers {
 		switch {
 		case isNegativeNumber(n):
-			str := strconv.Itoa(n)
-			result = append(result, str)
+			result = appendNum(result, n)
 
 		case isFizzBuzz(n):
 			result = append(result, fizzbuzz)
