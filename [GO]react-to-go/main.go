@@ -53,7 +53,13 @@ func init() {
 }
 
 func handler1(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 	switch r.Method {
+	case http.MethodOptions:
+		w.WriteHeader(http.StatusOK)
+		return
 	case http.MethodGet:
 		rows, err := db.Query("SELECT * FROM user")
 		if err != nil {
@@ -90,12 +96,14 @@ func handler1(w http.ResponseWriter, r *http.Request) {
 
 // ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
 func handler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 
 	switch r.Method {
 	case http.MethodOptions:
-		w.Header().Set("Access-Control-Allow-Headers", "*")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.WriteHeader(http.StatusOK)
+		return
 	case http.MethodGet:
 		// ②-1
 		name := r.URL.Query().Get("name") // To be filled
