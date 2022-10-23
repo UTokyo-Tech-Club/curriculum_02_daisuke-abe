@@ -42,5 +42,4 @@ func main() {
 }
 
 
-// test ci
-// added test
+// test CI
