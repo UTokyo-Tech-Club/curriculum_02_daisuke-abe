@@ -5,8 +5,9 @@ name: Go
 
 on:
   push:
-    paths: -'ut/fizzbuzz_test.go'
-      -'ut/fizzbuzz.go'
+    paths: 
+      - 'ut/fizzbuzz_test.go'
+      - 'ut/fizzbuzz.go'
 
 jobs:
   build:
