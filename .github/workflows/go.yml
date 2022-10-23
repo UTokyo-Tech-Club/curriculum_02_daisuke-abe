@@ -21,4 +21,4 @@ jobs:
       - name: Install dependencies
         run: go get .
       - name: Build
-        run: go build -v ./../../ut/fizzbuzz_test.go
+        run: go build -v ut/fizzbuzz_test.go
