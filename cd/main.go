@@ -20,7 +20,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	bytes, err := json.Marshal(responseMessage{
-		Message: "Hello, " + name + "!",
+		Message: "Hello, " + name + "-san!",
 	})
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
