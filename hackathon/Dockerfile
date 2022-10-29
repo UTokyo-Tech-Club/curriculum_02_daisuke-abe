@@ -1,5 +1,13 @@
 FROM golang:1.19.2
 
-RUN mkdir /echo
-COPY . /echo
-CMD ["go", "run", "/echo/main.go"]
+WORKDIR /app
+
+# Download necessary Go modules
+COPY go.mod ./
+COPY go.sum ./
+
+RUN go mod download
+
+COPY *.go ./
+
+CMD ["go", "run", "main.go"]
