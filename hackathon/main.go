@@ -11,7 +11,7 @@ import (
 	"syscall"
 
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 	"github.com/oklog/ulid/v2"
 )
 
@@ -31,10 +31,10 @@ var db *sql.DB
 
 func init() {
 	// ①-1
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatal("Error loading .env file")
+	// }
 
 	mysqlUser := os.Getenv("MYSQL_USER")
     mysqlPwd := os.Getenv("MYSQL_PWD")
