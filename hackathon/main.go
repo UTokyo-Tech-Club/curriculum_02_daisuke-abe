@@ -26,6 +26,13 @@ type UserResForHTTPPost struct {
 	Age  int
 }
 
+type TransactionPost struct {
+	Fromwhom string
+	Towhom string
+	Message string
+	Point int
+}
+
 // ① GoプログラムからMySQLへ接続
 var db *sql.DB
 
@@ -54,47 +61,47 @@ func init() {
 	db = _db
 }
 
-func handler1(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Headers", "*")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	switch r.Method {
-	case http.MethodOptions:
-		w.WriteHeader(http.StatusOK)
-		return
-	case http.MethodGet:
-		rows, err := db.Query("SELECT * FROM user")
-		if err != nil {
-			log.Printf("fail: db.Query, %v\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		users := make([]UserResForHTTPGet, 0)
-		for rows.Next() {
-			var u UserResForHTTPGet
-			if err := rows.Scan(&u.Id, &u.Name, &u.Age); err != nil {
-				log.Printf("fail: rows.Scan, %v\n", err)
+// func handler1(w http.ResponseWriter, r *http.Request) {
+// 	w.Header().Set("Access-Control-Allow-Headers", "*")
+// 	w.Header().Set("Access-Control-Allow-Origin", "*")
+// 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+// 	switch r.Method {
+// 	case http.MethodOptions:
+// 		w.WriteHeader(http.StatusOK)
+// 		return
+// 	case http.MethodGet:
+// 		rows, err := db.Query("SELECT * FROM user")
+// 		if err != nil {
+// 			log.Printf("fail: db.Query, %v\n", err)
+// 			w.WriteHeader(http.StatusInternalServerError)
+// 			return
+// 		}
+// 		users := make([]UserResForHTTPGet, 0)
+// 		for rows.Next() {
+// 			var u UserResForHTTPGet
+// 			if err := rows.Scan(&u.Id, &u.Name, &u.Age); err != nil {
+// 				log.Printf("fail: rows.Scan, %v\n", err)
 
-				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
-					log.Printf("fail: rows.Close(), %v\n", err)
-				}
-				w.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-			users = append(users, u)
-		}
+// 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
+// 					log.Printf("fail: rows.Close(), %v\n", err)
+// 				}
+// 				w.WriteHeader(http.StatusInternalServerError)
+// 				return
+// 			}
+// 			users = append(users, u)
+// 		}
 
-		// ②-4
-		bytes, err := json.Marshal(users)
-		if err != nil {
-			log.Printf("fail: json.Marshal, %v\n", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Content-Type", "application/json")
-		w.Write(bytes)
-	}
-}
+// 		// ②-4
+// 		bytes, err := json.Marshal(users)
+// 		if err != nil {
+// 			log.Printf("fail: json.Marshal, %v\n", err)
+// 			w.WriteHeader(http.StatusInternalServerError)
+// 			return
+// 		}
+// 		w.Header().Set("Content-Type", "application/json")
+// 		w.Write(bytes)
+// 	}
+// }
 
 // ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -150,7 +157,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		w.Write(bytes)
 
 	case http.MethodPost:
-		var u UserResForHTTPPost
+		var u TransactionPost
 		fmt.Println("got POST method")
 
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
@@ -159,15 +166,15 @@ func handler(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		if u.Name == "" || len(u.Name) > 50 || u.Age < 20 || u.Age > 80 {
-			fmt.Println("Name and age don't meet the format")
-			w.WriteHeader(http.StatusBadRequest)
-			return
-		}
+		// if u.Name == "" || len(u.Name) > 50 || u.Age < 20 || u.Age > 80 {
+		// 	fmt.Println("Name and age don't meet the format")
+		// 	w.WriteHeader(http.StatusBadRequest)
+		// 	return
+		// }
 
 		fmt.Printf("%+v\n", u)
 
-		ins, err := db.Prepare("INSERT INTO user VALUES(?, ?, ?)")
+		ins, err := db.Prepare("INSERT INTO transaction VALUES(?, ?, ?, ?, ?)")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -176,7 +183,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("SQL prepared")
 
 		id := ulid.Make()
-		res, err := ins.Exec(id.String(), u.Name, u.Age)
+		res, err := ins.Exec(id.String(), u.Fromwhom, u.Towhom, u.Message, u.Point)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -204,7 +211,7 @@ func main() {
 	http.HandleFunc("/user", handler)
 
 	// ラスト課題：/users にGETリクエストを送ると、USERテーブルの全レコードを返す
-	http.HandleFunc("/users", handler1)
+	// http.HandleFunc("/users", handler1)
 
 	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
 	closeDBWithSysCall()
