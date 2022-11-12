@@ -216,10 +216,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	// ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
 	// POSTもこっち
-	http.HandleFunc("/user", handler)
+	http.HandleFunc("/transaction", handler)
 
 	// ラスト課題：/users にGETリクエストを送ると、USERテーブルの全レコードを返す
-	http.HandleFunc("/users", list)
+	http.HandleFunc("/transactions", list)
 
 	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
 	closeDBWithSysCall()
