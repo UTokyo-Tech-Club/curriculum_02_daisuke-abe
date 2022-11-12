@@ -33,6 +33,14 @@ type TransactionPost struct {
 	Point int
 }
 
+type TransactionGet struct {
+	Id string `json:"id"`
+	Fromwhom string `json:"fromwhom"`
+	Towhom string `json:"towhom"`
+	Message string `json:"message"`
+	Point int `json:"point"`
+}
+
 // ① GoプログラムからMySQLへ接続
 var db *sql.DB
 
@@ -61,47 +69,47 @@ func init() {
 	db = _db
 }
 
-// func handler1(w http.ResponseWriter, r *http.Request) {
-// 	w.Header().Set("Access-Control-Allow-Headers", "*")
-// 	w.Header().Set("Access-Control-Allow-Origin", "*")
-// 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-// 	switch r.Method {
-// 	case http.MethodOptions:
-// 		w.WriteHeader(http.StatusOK)
-// 		return
-// 	case http.MethodGet:
-// 		rows, err := db.Query("SELECT * FROM user")
-// 		if err != nil {
-// 			log.Printf("fail: db.Query, %v\n", err)
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			return
-// 		}
-// 		users := make([]UserResForHTTPGet, 0)
-// 		for rows.Next() {
-// 			var u UserResForHTTPGet
-// 			if err := rows.Scan(&u.Id, &u.Name, &u.Age); err != nil {
-// 				log.Printf("fail: rows.Scan, %v\n", err)
+func list(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	switch r.Method {
+	case http.MethodOptions:
+		w.WriteHeader(http.StatusOK)
+		return
+	case http.MethodGet:
+		rows, err := db.Query("SELECT * FROM transaction")
+		if err != nil {
+			log.Printf("fail: db.Query, %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		users := make([]TransactionGet, 0)
+		for rows.Next() {
+			var u TransactionGet
+			if err := rows.Scan(&u.Id, &u.Fromwhom, &u.Towhom, &u.Message, &u.Point); err != nil {
+				log.Printf("fail: rows.Scan, %v\n", err)
 
-// 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
-// 					log.Printf("fail: rows.Close(), %v\n", err)
-// 				}
-// 				w.WriteHeader(http.StatusInternalServerError)
-// 				return
-// 			}
-// 			users = append(users, u)
-// 		}
+				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
+					log.Printf("fail: rows.Close(), %v\n", err)
+				}
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			users = append(users, u)
+		}
 
-// 		// ②-4
-// 		bytes, err := json.Marshal(users)
-// 		if err != nil {
-// 			log.Printf("fail: json.Marshal, %v\n", err)
-// 			w.WriteHeader(http.StatusInternalServerError)
-// 			return
-// 		}
-// 		w.Header().Set("Content-Type", "application/json")
-// 		w.Write(bytes)
-// 	}
-// }
+		// ②-4
+		bytes, err := json.Marshal(users)
+		if err != nil {
+			log.Printf("fail: json.Marshal, %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(bytes)
+	}
+}
 
 // ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -211,7 +219,7 @@ func main() {
 	http.HandleFunc("/user", handler)
 
 	// ラスト課題：/users にGETリクエストを送ると、USERテーブルの全レコードを返す
-	// http.HandleFunc("/users", handler1)
+	http.HandleFunc("/users", list)
 
 	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
 	closeDBWithSysCall()
