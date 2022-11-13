@@ -41,9 +41,13 @@ type TransactionGet struct {
 	Point    int    `json:"point"`
 }
 
+type TransactionDelete struct {
+	Id string
+}
+
 type PointGet struct {
-	Name string `json:"name"`
-	Point int `json:"point"`
+	Name  string `json:"name"`
+	Point int    `json:"point"`
 }
 
 // ① GoプログラムからMySQLへ接続
@@ -113,6 +117,37 @@ func list(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
+	case http.MethodDelete:
+		var u TransactionDelete
+		fmt.Println("got Delete method")
+
+		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+			fmt.Println("Decode失敗")
+			fmt.Printf("%+v\n", u)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		ins, err := db.Prepare("DELETE FROM transaction WHERE id = (?);")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		defer ins.Close()
+		fmt.Println("SQL prepared")
+
+		if _, err := ins.Exec(u.Id); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Println(u.Id + "Deleted from DB")
+
+		if err != nil {
+			log.Fatal(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
