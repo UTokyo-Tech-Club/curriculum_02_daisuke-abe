@@ -28,17 +28,17 @@ type UserResForHTTPPost struct {
 
 type TransactionPost struct {
 	Fromwhom string
-	Towhom string
-	Message string
-	Point int
+	Towhom   string
+	Message  string
+	Point    int
 }
 
 type TransactionGet struct {
-	Id string `json:"id"`
+	Id       string `json:"id"`
 	Fromwhom string `json:"fromwhom"`
-	Towhom string `json:"towhom"`
-	Message string `json:"message"`
-	Point int `json:"point"`
+	Towhom   string `json:"towhom"`
+	Message  string `json:"message"`
+	Point    int    `json:"point"`
 }
 
 // ① GoプログラムからMySQLへ接続
@@ -213,14 +213,58 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func points(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	switch r.Method {
+	case http.MethodOptions:
+		w.WriteHeader(http.StatusOK)
+		return
+	case http.MethodGet:
+		rows, err := db.Query("SELECT name, Sum(point) FROM user JOIN transaction ON transaction.fromwhom = user.id GROUP BY fromwhom ORDER BY Sum(point) DESC")
+		if err != nil {
+			log.Printf("fail: db.Query, %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		users := make([]TransactionGet, 0)
+		for rows.Next() {
+			var u TransactionGet
+			if err := rows.Scan(&u.Id, &u.Fromwhom, &u.Towhom, &u.Message, &u.Point); err != nil {
+				log.Printf("fail: rows.Scan, %v\n", err)
+
+				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
+					log.Printf("fail: rows.Close(), %v\n", err)
+				}
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			users = append(users, u)
+		}
+
+		// ②-4
+		bytes, err := json.Marshal(users)
+		if err != nil {
+			log.Printf("fail: json.Marshal, %v\n", err)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(bytes)
+	}
+}
+
 func main() {
 	// ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
 	// POSTもこっち
 	http.HandleFunc("/transaction", handler)
 
-	// ラスト課題：/users にGETリクエストを送ると、USERテーブルの全レコードを返す
+	// /transactions で取引の全履歴をJsonで返す
 	http.HandleFunc("/transactions", list)
 
+	// /points で各ユーザーごとのポイント数を返す
+	http.HandleFunc("/poimts", points)
 	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
 	closeDBWithSysCall()
 
