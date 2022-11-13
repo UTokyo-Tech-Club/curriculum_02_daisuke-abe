@@ -264,7 +264,7 @@ func main() {
 	http.HandleFunc("/transactions", list)
 
 	// /points で各ユーザーごとのポイント数を返す
-	http.HandleFunc("/poimts", points)
+	http.HandleFunc("/points", points)
 	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
 	closeDBWithSysCall()
 
