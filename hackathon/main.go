@@ -45,6 +45,12 @@ type TransactionDelete struct {
 	Id string
 }
 
+type EditPost struct {
+	Id string
+	Message string
+	Point int
+}
+
 type PointGet struct {
 	Name  string `json:"name"`
 	Point int    `json:"point"`
@@ -253,6 +259,49 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func edit(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Headers", "*")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	switch r.Method {
+	case http.MethodOptions:
+		w.WriteHeader(http.StatusOK)
+		return
+	case http.MethodPost:
+		var u EditPost
+		fmt.Println("got Edit POST method")
+
+		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+			fmt.Println("Decode失敗")
+			fmt.Printf("%+v\n", u)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Printf("%+v\n", u)
+
+		ins, err := db.Prepare("UPDATE transaction SET message = (?), point = (?) WHERE id = (?)")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		defer ins.Close()
+		fmt.Println("SQL prepared")
+
+		if _, err := ins.Exec(u.Id, u.Message, u.Point); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("inserted to DB")
+
+		if err != nil {
+			log.Fatal(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
 func points(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -302,6 +351,9 @@ func main() {
 
 	// /transactions で取引の全履歴をJsonで返す
 	http.HandleFunc("/transactions", list)
+
+	// 貢献の編集
+	http.HandleFunc("/edit", edit)
 
 	// /points で各ユーザーごとのポイント数を返す
 	http.HandleFunc("/points", points)
