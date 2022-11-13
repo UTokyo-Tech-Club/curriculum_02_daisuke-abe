@@ -227,7 +227,7 @@ func points(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	case http.MethodGet:
-		rows, err := db.Query("SELECT name, Sum(point) FROM user JOIN transaction ON transaction.fromwhom = user.id GROUP BY fromwhom ORDER BY Sum(point) DESC")
+		rows, err := db.Query("SELECT name, Sum(point) FROM user JOIN transaction ON transaction.towhom = user.id GROUP BY towhom ORDER BY Sum(point) DESC")
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
