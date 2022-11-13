@@ -288,11 +288,11 @@ func edit(w http.ResponseWriter, r *http.Request) {
 		defer ins.Close()
 		fmt.Println("SQL prepared")
 
-		if _, err := ins.Exec(u.Id, u.Message, u.Point); err != nil {
+		if _, err := ins.Exec(u.Message, u.Point, u.Id); err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		fmt.Println("inserted to DB")
+		fmt.Println("DB edited")
 
 		if err != nil {
 			log.Fatal(err)
