@@ -41,6 +41,11 @@ type TransactionGet struct {
 	Point    int    `json:"point"`
 }
 
+type PointGet struct {
+	Name string `json:"name"`
+	Point int `json:"point"`
+}
+
 // ① GoプログラムからMySQLへ接続
 var db *sql.DB
 
@@ -228,10 +233,10 @@ func points(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		users := make([]TransactionGet, 0)
+		points := make([]PointGet, 0)
 		for rows.Next() {
-			var u TransactionGet
-			if err := rows.Scan(&u.Id, &u.Fromwhom, &u.Towhom, &u.Message, &u.Point); err != nil {
+			var p PointGet
+			if err := rows.Scan(&p.Name, &p.Point); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
 				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
@@ -240,11 +245,11 @@ func points(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusInternalServerError)
 				return
 			}
-			users = append(users, u)
+			points = append(points, p)
 		}
 
 		// ②-4
-		bytes, err := json.Marshal(users)
+		bytes, err := json.Marshal(points)
 		if err != nil {
 			log.Printf("fail: json.Marshal, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
