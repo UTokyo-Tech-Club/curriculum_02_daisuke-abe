@@ -46,9 +46,9 @@ type TransactionDelete struct {
 }
 
 type EditPost struct {
-	Id string
+	Id      string
 	Message string
-	Point int
+	Point   int
 }
 
 type PointGet struct {
@@ -123,6 +123,45 @@ func list(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
+
+	case http.MethodPost:
+		var u TransactionPost
+		fmt.Println("got POST method")
+
+		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+			fmt.Println("Decode失敗")
+			fmt.Printf("%+v\n", u)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Printf("%+v\n", u)
+
+		ins, err := db.Prepare("INSERT INTO transaction VALUES(?, ?, ?, ?, ?)")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		defer ins.Close()
+		fmt.Println("SQL prepared")
+
+		id := ulid.Make()
+		res, err := ins.Exec(id.String(), u.Fromwhom, u.Towhom, u.Message, u.Point)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("inserted to DB")
+
+		lastInsertID, err := res.LastInsertId()
+		if err != nil {
+			log.Fatal(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		w.WriteHeader(http.StatusOK)
+		log.Println(lastInsertID)
+		fmt.Println("id: " + id.String())
+
 	case http.MethodDelete:
 		var u TransactionDelete
 		fmt.Println("got Delete method")
@@ -210,48 +249,43 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
 
-	case http.MethodPost:
-		var u TransactionPost
-		fmt.Println("got POST method")
+	// case http.MethodPost:
+	// 	var u TransactionPost
+	// 	fmt.Println("got POST method")
 
-		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
-			fmt.Println("Decode失敗")
-			fmt.Printf("%+v\n", u)
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		// if u.Name == "" || len(u.Name) > 50 || u.Age < 20 || u.Age > 80 {
-		// 	fmt.Println("Name and age don't meet the format")
-		// 	w.WriteHeader(http.StatusBadRequest)
-		// 	return
-		// }
+	// 	if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+	// 		fmt.Println("Decode失敗")
+	// 		fmt.Printf("%+v\n", u)
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 		return
+	// 	}
 
-		fmt.Printf("%+v\n", u)
+	// 	fmt.Printf("%+v\n", u)
 
-		ins, err := db.Prepare("INSERT INTO transaction VALUES(?, ?, ?, ?, ?)")
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		defer ins.Close()
-		fmt.Println("SQL prepared")
+	// 	ins, err := db.Prepare("INSERT INTO transaction VALUES(?, ?, ?, ?, ?)")
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// 	defer ins.Close()
+	// 	fmt.Println("SQL prepared")
 
-		id := ulid.Make()
-		res, err := ins.Exec(id.String(), u.Fromwhom, u.Towhom, u.Message, u.Point)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-		fmt.Println("inserted to DB")
+	// 	id := ulid.Make()
+	// 	res, err := ins.Exec(id.String(), u.Fromwhom, u.Towhom, u.Message, u.Point)
+	// 	if err != nil {
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 		return
+	// 	}
+	// 	fmt.Println("inserted to DB")
 
-		lastInsertID, err := res.LastInsertId()
-		if err != nil {
-			log.Fatal(err)
-			w.WriteHeader(http.StatusInternalServerError)
-		}
-		w.WriteHeader(http.StatusOK)
-		log.Println(lastInsertID)
-		fmt.Println("id: " + id.String())
+	// 	lastInsertID, err := res.LastInsertId()
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 		w.WriteHeader(http.StatusInternalServerError)
+	// 	}
+	// 	w.WriteHeader(http.StatusOK)
+	// 	log.Println(lastInsertID)
+	// 	fmt.Println("id: " + id.String())
 	default:
 		log.Printf("fail: HTTP Method is %s\n", r.Method)
 		w.WriteHeader(http.StatusBadRequest)
