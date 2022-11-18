@@ -41,7 +41,6 @@ func Points(w http.ResponseWriter, r *http.Request) {
 			points = append(points, p)
 		}
 
-		// ②-4
 		bytes, err := json.Marshal(points)
 		if err != nil {
 			log.Printf("fail: json.Marshal, %v\n", err)
@@ -50,5 +49,9 @@ func Points(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(bytes)
+	default:
+		log.Printf("fail: HTTP Method is %s\n", r.Method)
+		w.WriteHeader(http.StatusBadRequest)
+		return
 	}
 }

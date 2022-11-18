@@ -64,7 +64,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 			if err := rows.Scan(&u.Id, &u.Fromwhom, &u.Towhom, &u.Message, &u.Point); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
-				if err := rows.Close(); err != nil { // 500を返して終了するが、その前にrowsのClose処理が必要
+				if err := rows.Close(); err != nil { 
 					log.Printf("fail: rows.Close(), %v\n", err)
 				}
 				w.WriteHeader(http.StatusInternalServerError)
@@ -73,7 +73,6 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 			users = append(users, u)
 		}
 
-		// ②-4
 		bytes, err := json.Marshal(users)
 		if err != nil {
 			log.Printf("fail: json.Marshal, %v\n", err)
@@ -89,12 +88,9 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 			fmt.Println("Decode失敗")
-			fmt.Printf("%+v\n", u)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
-		fmt.Printf("%+v\n", u)
 
 		ins, err := db.Prepare("INSERT INTO transaction VALUES(?, ?, ?, ?, ?)")
 		if err != nil {
@@ -127,12 +123,9 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
 			fmt.Println("Decode失敗")
-			fmt.Printf("%+v\n", u)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-
-		fmt.Printf("%+v\n", u)
 
 		ins, err := db.Prepare("UPDATE transaction SET message = (?), point = (?) WHERE id = (?)")
 		if err != nil {
