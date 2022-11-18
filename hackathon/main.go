@@ -296,7 +296,7 @@ func main() {
 	// http.HandleFunc("/transaction", handler)
 
 	// /transactions で取引の全履歴をJsonで返す
-	http.HandleFunc("/transactions", transactions)
+	http.HandleFunc("/transactions", Transactions)
 
 	// 貢献の編集
 	http.HandleFunc("/edit", edit)

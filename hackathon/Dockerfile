@@ -10,4 +10,4 @@ RUN go mod download
 
 COPY *.go ./
 
-CMD ["go", "run", "main.go"]
+CMD ["go", "run", "main.go" "transactions.go"]
