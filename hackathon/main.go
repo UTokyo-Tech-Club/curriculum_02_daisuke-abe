@@ -12,47 +12,6 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 )
 
-type UserResForHTTPGet struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-	Age  int    `json:"age"`
-}
-
-type UserResForHTTPPost struct {
-	Name string
-	Age  int
-}
-
-type TransactionPost struct {
-	Fromwhom string
-	Towhom   string
-	Message  string
-	Point    int
-}
-
-type TransactionGet struct {
-	Id       string `json:"id"`
-	Fromwhom string `json:"fromwhom"`
-	Towhom   string `json:"towhom"`
-	Message  string `json:"message"`
-	Point    int    `json:"point"`
-}
-
-type TransactionDelete struct {
-	Id string
-}
-
-type EditPost struct {
-	Id      string
-	Message string
-	Point   int
-}
-
-type PointGet struct {
-	Name  string `json:"name"`
-	Point int    `json:"point"`
-}
-
 // ① GoプログラムからMySQLへ接続
 var db *sql.DB
 
@@ -82,15 +41,12 @@ func init() {
 }
 
 func main() {
-	// ② /userでリクエストされたらnameパラメーターと一致する名前を持つレコードをJSON形式で返す
-	// POSTもこっち
-	// http.HandleFunc("/transaction", handler)
 
-	// /transactions で取引の全履歴をJsonで返す
+	// /transactions で -取引の全履歴をGET -取引を作成/削除/編集
 	http.HandleFunc("/transactions", Transactions)
 
-	// 貢献の編集
-	http.HandleFunc("/edit", Edit)
+	// /edit で取引の編集
+	// http.HandleFunc("/edit", Edit)
 
 	// /points で各ユーザーごとのポイント数を返す
 	http.HandleFunc("/points", Points)

@@ -9,6 +9,40 @@ import (
 	"github.com/oklog/ulid/v2"
 )
 
+type UserResForHTTPGet struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+	Age  int    `json:"age"`
+}
+
+type UserResForHTTPPost struct {
+	Name string
+	Age  int
+}
+
+type TransactionPost struct {
+	Fromwhom string
+	Towhom   string
+	Message  string
+	Point    int
+}
+
+type TransactionGet struct {
+	Id       string `json:"id"`
+	Fromwhom string `json:"fromwhom"`
+	Towhom   string `json:"towhom"`
+	Message  string `json:"message"`
+	Point    int    `json:"point"`
+}
+type TransactionPut struct {
+	Id      string
+	Message string
+	Point   int
+}
+type TransactionDelete struct {
+	Id string
+}
+
 func Transactions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -86,6 +120,39 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		log.Println(lastInsertID)
 		fmt.Println("id: " + id.String())
+
+	case http.MethodPut:
+		var u TransactionPut
+		fmt.Println("got PUT method")
+
+		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
+			fmt.Println("Decode失敗")
+			fmt.Printf("%+v\n", u)
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		fmt.Printf("%+v\n", u)
+
+		ins, err := db.Prepare("UPDATE transaction SET message = (?), point = (?) WHERE id = (?)")
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		defer ins.Close()
+		fmt.Println("SQL prepared")
+
+		if _, err := ins.Exec(u.Message, u.Point, u.Id); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		fmt.Println("DB edited")
+
+		if err != nil {
+			log.Fatal(err)
+			w.WriteHeader(http.StatusInternalServerError)
+		}
+		w.WriteHeader(http.StatusOK)
 
 	case http.MethodDelete:
 		var u TransactionDelete

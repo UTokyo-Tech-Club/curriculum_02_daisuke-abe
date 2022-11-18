@@ -6,6 +6,11 @@ import (
 	"net/http"
 )
 
+type PointGet struct {
+	Name  string `json:"name"`
+	Point int    `json:"point"`
+}
+
 func Points(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
