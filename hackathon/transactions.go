@@ -64,7 +64,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 			if err := rows.Scan(&u.Id, &u.Fromwhom, &u.Towhom, &u.Message, &u.Point); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
-				if err := rows.Close(); err != nil { 
+				if err := rows.Close(); err != nil {
 					log.Printf("fail: rows.Close(), %v\n", err)
 				}
 				w.WriteHeader(http.StatusInternalServerError)
