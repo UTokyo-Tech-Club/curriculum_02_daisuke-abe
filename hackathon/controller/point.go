@@ -7,5 +7,5 @@ import (
 )
 
 func Point() {
-	http.HandleFunc("/transactions", usecase.Transactions)
+	http.HandleFunc("/points", usecase.Points)
 }
