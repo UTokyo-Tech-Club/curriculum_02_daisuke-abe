@@ -1,4 +1,4 @@
-package main
+package dao
 
 import (
 	"database/sql"
@@ -7,9 +7,11 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
-var db *sql.DB
+var Db *sql.DB
 
 func init() {
 	mysqlUser := os.Getenv("MYSQL_USER")
@@ -24,18 +26,18 @@ func init() {
 	if err := _db.Ping(); err != nil {
 		log.Fatalf("fail: _db.Ping, %v\n", err)
 	}
-	db = _db
+	Db = _db
 }
 
 // Ctrl+CでHTTPサーバー停止時にDBをクローズする
-func closeDBWithSysCall() {
+func CloseDBWithSysCall() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGTERM, syscall.SIGINT)
 	go func() {
 		s := <-sig
 		log.Printf("received syscall, %v", s)
 
-		if err := db.Close(); err != nil {
+		if err := Db.Close(); err != nil {
 			log.Fatal(err)
 		}
 		log.Printf("success: db.Close()")

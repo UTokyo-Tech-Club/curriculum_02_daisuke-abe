@@ -1,21 +1,23 @@
 package main
 
 import (
+	"UTTC_curriculum/test/controller"
+	"UTTC_curriculum/test/dao"
+
 	"log"
 	"net/http"
-	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
 
 	// /transactions で -取引の全履歴をGET -取引を作成/削除/編集
-	http.HandleFunc("/transactions", Transactions)
+	controller.Point()
 
 	// /points で各ユーザーごとのポイント数を返す
-	http.HandleFunc("/points", Points)
+	controller.Transaction()
 
 	// ③ Ctrl+CでHTTPサーバー停止時にDBをクローズする
-	closeDBWithSysCall()
+	dao.CloseDBWithSysCall()
 
 	// 8080番ポートでリクエストを待ち受ける
 	log.Println("Listening...")

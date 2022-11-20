@@ -1,15 +1,14 @@
-package main
+package usecase
 
 import (
+
+	"UTTC_curriculum/test/model"
+	"UTTC_curriculum/test/dao"
+
 	"encoding/json"
 	"log"
 	"net/http"
 )
-
-type PointGet struct {
-	Name  string `json:"name"`
-	Point int    `json:"point"`
-}
 
 func Points(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -20,15 +19,15 @@ func Points(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	case http.MethodGet:
-		rows, err := db.Query("SELECT name, Sum(point) FROM user JOIN transaction ON transaction.towhom = user.id GROUP BY towhom ORDER BY Sum(point) DESC")
+		rows, err := dao.Db.Query("SELECT name, Sum(point) FROM user JOIN transaction ON transaction.towhom = user.id GROUP BY towhom ORDER BY Sum(point) DESC")
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		points := make([]PointGet, 0)
+		points := make([]model.PointGet, 0)
 		for rows.Next() {
-			var p PointGet
+			var p model.PointGet
 			if err := rows.Scan(&p.Name, &p.Point); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 

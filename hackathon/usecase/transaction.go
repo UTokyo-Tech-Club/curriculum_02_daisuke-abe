@@ -1,4 +1,4 @@
-package main
+package usecase
 
 import (
 	"encoding/json"
@@ -7,41 +7,10 @@ import (
 	"net/http"
 
 	"github.com/oklog/ulid/v2"
+
+	"UTTC_curriculum/test/dao"
+	"UTTC_curriculum/test/model"
 )
-
-type UserResForHTTPGet struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-	Age  int    `json:"age"`
-}
-
-type UserResForHTTPPost struct {
-	Name string
-	Age  int
-}
-
-type TransactionPost struct {
-	Fromwhom string
-	Towhom   string
-	Message  string
-	Point    int
-}
-
-type TransactionGet struct {
-	Id       string `json:"id"`
-	Fromwhom string `json:"fromwhom"`
-	Towhom   string `json:"towhom"`
-	Message  string `json:"message"`
-	Point    int    `json:"point"`
-}
-type TransactionPut struct {
-	Id      string
-	Message string
-	Point   int
-}
-type TransactionDelete struct {
-	Id string
-}
 
 func Transactions(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "*")
@@ -52,15 +21,15 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	case http.MethodGet:
-		rows, err := db.Query("SELECT * FROM transaction")
+		rows, err := dao.Db.Query("SELECT * FROM transaction")
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		users := make([]TransactionGet, 0)
+		users := make([]model.TransactionGet, 0)
 		for rows.Next() {
-			var u TransactionGet
+			var u model.TransactionGet
 			if err := rows.Scan(&u.Id, &u.Fromwhom, &u.Towhom, &u.Message, &u.Point); err != nil {
 				log.Printf("fail: rows.Scan, %v\n", err)
 
@@ -83,7 +52,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 		w.Write(bytes)
 
 	case http.MethodPost:
-		var u TransactionPost
+		var u model.TransactionPost
 		fmt.Println("got POST method")
 
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
@@ -92,7 +61,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ins, err := db.Prepare("INSERT INTO transaction VALUES(?, ?, ?, ?, ?)")
+		ins, err := dao.Db.Prepare("INSERT INTO transaction VALUES(?, ?, ?, ?, ?)")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -118,7 +87,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("id: " + id.String())
 
 	case http.MethodPut:
-		var u TransactionPut
+		var u model.TransactionPut
 		fmt.Println("got PUT method")
 
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
@@ -127,7 +96,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ins, err := db.Prepare("UPDATE transaction SET message = (?), point = (?) WHERE id = (?)")
+		ins, err := dao.Db.Prepare("UPDATE transaction SET message = (?), point = (?) WHERE id = (?)")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -148,7 +117,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 
 	case http.MethodDelete:
-		var u TransactionDelete
+		var u model.TransactionDelete
 		fmt.Println("got Delete method")
 
 		if err := json.NewDecoder(r.Body).Decode(&u); err != nil {
@@ -158,7 +127,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ins, err := db.Prepare("DELETE FROM transaction WHERE id = (?);")
+		ins, err := dao.Db.Prepare("DELETE FROM transaction WHERE id = (?);")
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
