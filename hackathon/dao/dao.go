@@ -44,3 +44,15 @@ func CloseDBWithSysCall() {
 		os.Exit(0)
 	}()
 }
+
+func PointsCheck() (*sql.Rows, error) {
+	return Db.Query("SELECT name, Sum(point) FROM user JOIN transaction ON transaction.towhom = user.id GROUP BY towhom ORDER BY Sum(point) DESC")
+}
+
+func TransactionsCheck() (*sql.Rows, error) {
+	return Db.Query("SELECT * FROM transaction")
+}
+
+func TransactionCreate() (*sql.Stmt, error) {
+	return Db.Prepare("INSERT INTO transaction VALUES(?, ?, ?, ?, ?)")
+}

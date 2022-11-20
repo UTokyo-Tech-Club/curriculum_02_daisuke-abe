@@ -21,7 +21,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	case http.MethodGet:
-		rows, err := dao.Db.Query("SELECT * FROM transaction")
+		rows, err := dao.TransactionsCheck()
 		if err != nil {
 			log.Printf("fail: db.Query, %v\n", err)
 			w.WriteHeader(http.StatusInternalServerError)
@@ -61,7 +61,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ins, err := dao.Db.Prepare("INSERT INTO transaction VALUES(?, ?, ?, ?, ?)")
+		ins, err := dao.TransactionCreate()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
