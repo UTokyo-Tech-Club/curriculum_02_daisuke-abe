@@ -56,3 +56,11 @@ func TransactionsCheck() (*sql.Rows, error) {
 func TransactionCreate() (*sql.Stmt, error) {
 	return Db.Prepare("INSERT INTO transaction VALUES(?, ?, ?, ?, ?)")
 }
+
+func TransactionUpdate() (*sql.Stmt, error) {
+	return Db.Prepare("UPDATE transaction SET message = (?), point = (?) WHERE id = (?)")
+}
+
+func TransactionDelete() (*sql.Stmt, error) {
+	return Db.Prepare("DELETE FROM transaction WHERE id = (?);")
+}

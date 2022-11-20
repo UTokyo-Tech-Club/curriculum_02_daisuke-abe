@@ -96,7 +96,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ins, err := dao.Db.Prepare("UPDATE transaction SET message = (?), point = (?) WHERE id = (?)")
+		ins, err := dao.TransactionUpdate()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
@@ -127,7 +127,7 @@ func Transactions(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ins, err := dao.Db.Prepare("DELETE FROM transaction WHERE id = (?);")
+		ins, err := dao.TransactionDelete()
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
