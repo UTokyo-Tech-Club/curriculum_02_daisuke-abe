@@ -7,12 +7,8 @@ ENV GO111MODULE=on
 COPY go.mod ./
 COPY go.sum ./
 
-COPY main.go ./
-COPY controller ./controller
-COPY usecase ./usecase
-COPY dao ./dao
-COPY model ./model
+COPY ./ .
 
 RUN go mod download
 
-CMD ["go", "run", "."]
+CMD ["go", "run", "main.go"]
